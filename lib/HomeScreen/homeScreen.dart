@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:instance_expence_cal/HomeScreen/addFloatingScreen.dart';
+import 'package:instance_expence_cal/splashScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -7,21 +9,13 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   var _totalExpence = 0.0;
-  var itemDetails = [
-    {'name': 'Name1', 'price': 10.0, 'image': 'tea.png'},
-    {'name': 'Name2', 'price': 5.0, 'image': 'tea.png'},
-    {'name': 'Name3', 'price': 7.0, 'image': 'tea.png'},
-    {'name': 'Name4', 'price': 15.5, 'image': 'tea.png'},
-    {'name': 'Name5', 'price': 17.0, 'image': 'tea.png'},
-    {'name': 'Name6', 'price': 4.0, 'image': 'tea.png'},
-    {'name': '', 'price': '', 'image': ''}
-  ];
+  var itemDetails = SplashScreenState.itemDetails;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          title: Text(
+          title: const Text(
             "Home",
             style: TextStyle(color: Colors.white, fontWeight: FontWeight.w500),
           ),
@@ -189,7 +183,8 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         onTap: () {
-          print("Add");
+          // _toggleAddFloatingScreen();
+          getAddFloatingScreen();
         },
       ),
     );
@@ -197,9 +192,11 @@ class _HomeScreenState extends State<HomeScreen> {
 
   getItemBoxDecoration(BuildContext context) {
     return BoxDecoration(
-        color: Theme.of(context).secondaryHeaderColor,
+        color: Colors.transparent,
         borderRadius: BorderRadius.all(Radius.circular(10)),
-        border: Border.all(width: 1),
+        border: Border.all(
+          width: 1,
+        ),
         boxShadow: const [
           BoxShadow(
             color: Colors.black54,
@@ -208,5 +205,9 @@ class _HomeScreenState extends State<HomeScreen> {
             offset: Offset(3, 3),
           ),
         ]);
+  }
+
+  getAddFloatingScreen() {
+    return AddFloatingScreen().build(context);
   }
 }
