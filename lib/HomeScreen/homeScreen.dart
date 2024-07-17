@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:instance_expence_cal/HomeScreen/addFloatingScreen.dart';
+import 'package:flutter/widgets.dart';
 import 'package:instance_expence_cal/splashScreen.dart';
+import 'addFloatingScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   @override
@@ -9,10 +10,17 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   var _totalExpence = 0.0;
-  var itemDetails = SplashScreenState.itemDetails;
+  bool isProtrate = true;
 
   @override
   Widget build(BuildContext context) {
+    var itemDetails = SplashScreenState.itemDetails;
+    var orientation = MediaQuery.of(context).orientation;
+    if (orientation == Orientation.portrait) {
+      isProtrate = true;
+    } else {
+      isProtrate = false;
+    }
     return Scaffold(
       appBar: AppBar(
           title: const Text(
@@ -31,7 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   Padding(
-                    padding: const EdgeInsets.all(12),
+                    padding: isProtrate
+                        ? const EdgeInsets.all(12)
+                        : const EdgeInsets.only(left: 10, top: 2, bottom: 2),
                     child: FittedBox(
                       fit: BoxFit.contain,
                       child: Text(
@@ -41,14 +51,17 @@ class _HomeScreenState extends State<HomeScreen> {
                     ),
                   ),
                   Padding(
-                      padding: const EdgeInsets.all(10),
+                      padding:
+                          isProtrate ? EdgeInsets.all(10) : EdgeInsets.all(3),
                       child: ElevatedButton(
                         onPressed: () {
                           print("button pressed");
                         },
                         style: getExpenceBtnStyle(context),
                         child: Padding(
-                          padding: const EdgeInsets.all(8.0),
+                          padding: isProtrate
+                              ? const EdgeInsets.all(8.0)
+                              : const EdgeInsets.all(2),
                           child: FittedBox(
                               fit: BoxFit.contain,
                               child: Text('$_totalExpence')),
@@ -70,12 +83,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       child: getGridViewForBody(itemDetails),
                     ),
                     Expanded(
-                      flex: 1,
-                      child: getResetButton(context),
+                      flex: isProtrate ? 1 : 3,
+                      child: getResetButton(context, isProtrate),
                     )
                   ],
                 )),
-          )
+          ),
         ],
       ),
     );
@@ -89,6 +102,17 @@ class _HomeScreenState extends State<HomeScreen> {
             fontSize: 25, fontWeight: FontWeight.bold, color: Colors.black),
         shape: const RoundedRectangleBorder(
             borderRadius: BorderRadius.all(Radius.circular(5))));
+  }
+
+  getGridItemButtonStyle() {
+    return ElevatedButton.styleFrom(
+      backgroundColor: Color.fromARGB(255, 255, 255, 255),
+      elevation: 10,
+      // textStyle: const TextStyle(fontSize: 10, color: Colors.black),
+      shape: const RoundedRectangleBorder(
+          borderRadius: BorderRadius.all(Radius.circular(5))),
+      padding: const EdgeInsets.all(10),
+    );
   }
 
   getHeaderTextStyle() {
@@ -111,7 +135,7 @@ class _HomeScreenState extends State<HomeScreen> {
     );
   }
 
-  getResetButton(BuildContext context) {
+  getResetButton(BuildContext context, bool isProtrate) {
     return Container(
       child: Padding(
         padding: const EdgeInsets.all(10),
@@ -124,38 +148,36 @@ class _HomeScreenState extends State<HomeScreen> {
             style: getExpenceBtnStyle(context),
             child: Text(
               "Reset Expence",
-              style: TextStyle(fontSize: 25, fontWeight: FontWeight.bold),
+              style: isProtrate
+                  ? const TextStyle(fontSize: 25, fontWeight: FontWeight.bold)
+                  : const TextStyle(fontSize: 15, fontWeight: FontWeight.bold),
             )),
       ),
     );
   }
 
   getGridViewItems(List<Map<String, Object>> itemDetails, int index) {
-    return Material(
-      child: InkWell(
-        splashColor: Colors.redAccent.withOpacity(0.5),
-        highlightColor: Colors.yellow.withOpacity(0.3),
-        child: Column(
-          children: [
-            Expanded(
-              flex: 1,
-              child: Image.asset(
-                "assets/images/${itemDetails[index]['image']}",
-                fit: BoxFit.cover,
-              ),
+    return ElevatedButton(
+      onPressed: () {
+        addTotalExpence(itemDetails, index);
+      },
+      style: getGridItemButtonStyle(),
+      child: Column(
+        children: [
+          Expanded(
+            flex: 1,
+            child: Image.asset(
+              "assets/images/${itemDetails[index]['image']}",
+              fit: BoxFit.contain,
             ),
-            Text(
-              itemDetails[index]['name'].toString(),
-            ),
-            Text(
-              'Rs. ${itemDetails[index]['price']}',
-            ),
-          ],
-        ),
-        onTap: () {
-          print("Index : ${itemDetails[index]['price']}");
-          addTotalExpence(itemDetails, index);
-        },
+          ),
+          Text(
+            itemDetails[index]['name'].toString(),
+          ),
+          Text(
+            'Rs. ${itemDetails[index]['price']}',
+          ),
+        ],
       ),
     );
   }
@@ -168,32 +190,29 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   getGridViewAddIconBox() {
-    return Material(
-      child: InkWell(
-        splashColor: Colors.redAccent.withOpacity(0.5),
-        highlightColor: Colors.yellow.withOpacity(0.3),
-        child: const Icon(
-          Icons.add,
-          size: 60,
-          shadows: [
-            Shadow(
-                color: Color.fromARGB(255, 139, 135, 135),
-                blurRadius: 3,
-                offset: Offset(3, 3))
-          ],
-        ),
-        onTap: () {
-          // _toggleAddFloatingScreen();
-          getAddFloatingScreen();
-        },
+    return ElevatedButton(
+      onPressed: () {
+        // _toggleAddFloatingScreen();
+        getAddFloatingScreen();
+      },
+      style: getGridItemButtonStyle(),
+      child: const Icon(
+        Icons.add,
+        size: 60,
+        shadows: [
+          Shadow(
+              color: Color.fromARGB(255, 139, 135, 135),
+              blurRadius: 3,
+              offset: Offset(3, 3))
+        ],
       ),
     );
   }
 
   getItemBoxDecoration(BuildContext context) {
     return BoxDecoration(
-        color: Colors.transparent,
-        borderRadius: BorderRadius.all(Radius.circular(10)),
+        color: Colors.white,
+        borderRadius: BorderRadius.all(Radius.circular(5)),
         border: Border.all(
           width: 1,
         ),

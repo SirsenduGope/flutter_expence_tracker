@@ -12,6 +12,8 @@ class SplashScreen extends StatefulWidget {
 }
 
 class SplashScreenState extends State<SplashScreen> {
+  static const ITEM_DATA_STORE_AND_RETRIVAL_KEY = 'itemDetails';
+
   static List<Map<String, Object>> itemDetails = [
     {'name': 'Name1', 'price': 10.0, 'image': 'tea.png'},
     {'name': '', 'price': '', 'image': ''}
@@ -29,12 +31,11 @@ class SplashScreenState extends State<SplashScreen> {
 
   Future<void> _loadItems() async {
     SharedPreferences prefs = await SharedPreferences.getInstance();
-    List<String>? serializedItems = prefs.getStringList('items');
-    if (serializedItems != null) {
-      List<Map<String, Object>> loadedItems = serializedItems.map((item) {
-        Map<String, dynamic> decodedItem = jsonDecode(item);
-        return Map<String, Object>.from(decodedItem);
-      }).toList();
+    String? jsonString = prefs.getString(ITEM_DATA_STORE_AND_RETRIVAL_KEY);
+    if (jsonString != null) {
+      List<dynamic> jsonList = jsonDecode(jsonString);
+      List<Map<String, Object>> loadedItems =
+          jsonList.map((item) => item as Map<String, Object>).toList();
 
       setState(() {
         itemDetails = loadedItems;

@@ -1,4 +1,9 @@
+import 'dart:collection';
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
+import 'package:instance_expence_cal/splashScreen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AddFloatingScreen extends StatelessWidget {
   var newItemName = TextEditingController();
@@ -7,47 +12,67 @@ class AddFloatingScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return _showBottomSheet(context);
+    var orientation = MediaQuery.of(context).orientation;
+    if (orientation == Orientation.portrait) {
+      return _showBottomSheet(context, true);
+    } else {
+      return _showBottomSheet(context, false);
+    }
   }
 
-  _showBottomSheet(BuildContext context) {
+  _showBottomSheet(BuildContext context, bool isProtrate) {
     showModalBottomSheet(
       context: context,
       builder: (BuildContext context) {
         return Center(
           child: Container(
-            padding: EdgeInsets.all(16.0),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: <Widget>[
-                Text(
-                  "Add New Item",
-                  style: TextStyle(fontSize: 30, fontWeight: FontWeight.bold),
-                ),
-                SizedBox(height: 30.0),
-                _getItemAdditionFormDesign(),
-                SizedBox(height: 20.0),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Add'),
-                    ),
-                    SizedBox(
-                      width: 20,
-                    ),
-                    ElevatedButton(
-                      onPressed: () => Navigator.of(context).pop(),
-                      child: Text('Cancel'),
-                    ),
-                  ],
-                )
-              ],
-            ),
+            width: MediaQuery.of(context).size.width * 0.9,
+            padding: const EdgeInsets.all(16.0),
+            child: _getAdditionModel(context, isProtrate),
           ),
         );
       },
+    );
+  }
+
+  _getAdditionModel(BuildContext context, bool isProtrate) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        Text(
+          "Add New Item",
+          style: isProtrate
+              ? const TextStyle(fontSize: 30, fontWeight: FontWeight.bold)
+              : const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
+        ),
+        isProtrate ? const SizedBox(height: 30.0) : const SizedBox(height: 0.0),
+        _getItemAdditionFormDesign(),
+        isProtrate ? const SizedBox(height: 20.0) : const SizedBox(height: 0.0),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            ElevatedButton(
+              onPressed: () {
+                saveNewItem(
+                    newItemName.text.toString(), newItemPrice.text.toString());
+                Navigator.of(context).pop();
+              },
+              child: const Text('Add'),
+            ),
+            isProtrate
+                ? const SizedBox(
+                    width: 20,
+                  )
+                : const SizedBox(
+                    width: 40,
+                  ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: Text('Cancel'),
+            ),
+          ],
+        )
+      ],
     );
   }
 
@@ -66,7 +91,7 @@ class AddFloatingScreen extends StatelessWidget {
                   ),
                 )),
             SizedBox(
-              width: 20,
+              width: 40,
             ),
             Expanded(
                 flex: 3,
@@ -75,6 +100,8 @@ class AddFloatingScreen extends StatelessWidget {
                     Container(
                       child: TextField(
                         controller: newItemName,
+                        keyboardType: TextInputType.name,
+                        maxLength: 10,
                         decoration: const InputDecoration(
                             focusColor: Colors.green,
                             hintText: "Item Name",
@@ -89,6 +116,7 @@ class AddFloatingScreen extends StatelessWidget {
                     Container(
                       child: TextField(
                         controller: newItemPrice,
+                        keyboardType: TextInputType.number,
                         decoration: const InputDecoration(
                             focusColor: Colors.green,
                             hintText: "Item Price",
@@ -103,5 +131,24 @@ class AddFloatingScreen extends StatelessWidget {
         ),
       ),
     );
+  }
+
+  void saveNewItem(String newItemName, String newItemPrice) {
+    Map<String, Object> newItem = {
+      'name': newItemName,
+      'price': newItemPrice,
+      'image': ''
+    };
+    print("New item : $newItem");
+    _addItem(newItem);
+  }
+
+  Future<void> _addItem(Map<String, Object> newItem) async {
+    var itemDetails = SplashScreenState.itemDetails;
+    itemDetails.add(newItem);
+    String jsonString = jsonEncode(itemDetails);
+    SharedPreferences prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+        SplashScreenState.ITEM_DATA_STORE_AND_RETRIVAL_KEY, jsonString);
   }
 }
